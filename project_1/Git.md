@@ -1,4 +1,4 @@
-## GitHub
+# GitHub
 
 Conforme as alterações forem feitas no diretório do projeto, é necessário adicioná-las por meio do comando:
 
