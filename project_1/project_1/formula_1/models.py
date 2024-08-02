@@ -1,3 +1,4 @@
+from copy import deepcopy
 from dataclasses import dataclass
 from functools import reduce
 
@@ -128,14 +129,14 @@ class Race:
         self.positions = []
 
     def classification(self) -> list[RacePosition]:
-        table: list = []
-        for race_position in self.positions:
-            table.append(
-                race_position
-            )
-        return sorted(table, key=lambda driver: driver.position)
+        # table: list = self.positions.
+        # for race_position in self.positions:
+        #     table.append(
+        #         race_position
+        #     )
+        return sorted(deepcopy(self.positions), key=lambda driver: driver.position)
 
-    def driver_races(self, driver_id: str) -> list["RacePosition"]:
+    def driver_races(self, driver_id: str) -> list[RacePosition]:
         return list(
             filter(
                 lambda race_position: race_position.driver.code == driver_id,
@@ -143,7 +144,7 @@ class Race:
             )
         )
     
-    def constructor_races(self, constructor_id: str) -> list["RacePosition"]:
+    def constructor_races(self, constructor_id: str) -> list[RacePosition]:
         return list(
             filter(
                 lambda race_position: race_position.constructor.id == constructor_id,
@@ -158,15 +159,12 @@ class Race:
 class Season:
     year: str
     rounds: int
-    races: list["Race"]
+    races: list[Race]
 
     def __init__(self) -> None:
         self.races = []
 
-    def __init__(self) -> None:
-        self.races = []
-
-    def driver_classification(self, drivers: dict) -> dict:
+    def driver_classification(self, drivers: dict[int, Driver]) -> dict:
         classification: list = []
         for driver in drivers.keys():
             driver_id: str = drivers[driver].code
