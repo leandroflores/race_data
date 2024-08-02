@@ -2,7 +2,7 @@ import json
 import os
 import requests
 
-class ImportData:
+class Repository:
     
     def __init__(self, year: int) -> None:
         self.url_base: str = "http://ergast.com/api/f1"
@@ -73,9 +73,9 @@ class ImportData:
 
 
 def main() -> None:
-    years: range[int] = range(2010, 2024)
+    years: range[int] = range(1997, 2024)
     for year in years:
         print(year)
-        ImportData(year).create_season_file()
+        Repository(year).create_season_file()
 
 main()

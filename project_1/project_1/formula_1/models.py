@@ -38,13 +38,18 @@ class Circuit:
             adict.get("url", None)
         )
     
+    @property
+    def location(self) -> str:
+        return f"{self.city} - {self.country}"
+    
     def __repr__(self) -> str:
         return self.id
 
 @dataclass
 class Driver:
-    id: str
+    number: int
     code: str
+    identifier: str
     first_name: str
     last_name: str
     birth_data: str
@@ -54,14 +59,19 @@ class Driver:
     @staticmethod
     def from_dict(adict: dict) -> "Driver":
         return Driver(
-            adict.get("driverId", None),
+            int(adict.get("permanentNumber", 0)),
             adict.get("code", None),
+            adict.get("driverId", None),
             adict.get("givenName", None),
             adict.get("familyName", None),
             adict.get("dateOfBirth", None),
             adict.get("nationality", None),
             adict.get("url", None)
-        ) 
+        )
+    
+    @property
+    def full_name(self) -> str:
+        return f"{self.first_name} {self.last_name}"
         
     def __repr__(self) -> str:
         return self.code
