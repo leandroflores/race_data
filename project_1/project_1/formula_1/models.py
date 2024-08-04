@@ -1,6 +1,7 @@
 from copy import deepcopy
 from dataclasses import dataclass
 from functools import reduce
+from itertools import chain
 
 @dataclass
 class Constructor:
@@ -75,7 +76,7 @@ class Driver:
         return f"{self.first_name} {self.last_name}"
         
     def __repr__(self) -> str:
-        return self.code
+        return self.identifier
 
 @dataclass
 class RacePosition:
@@ -115,6 +116,10 @@ class RacePosition:
         except Exception:
             return float("inf")
         
+    @property
+    def details(self) -> str:
+        return f"{self.position} - {self.driver.code} = {self.points}"
+        
     def __str__(self) -> str:
         return f"{self.driver} - {self.position} - {self.time} ({self.status})"
 
@@ -129,12 +134,11 @@ class Race:
         self.positions = []
 
     def classification(self) -> list[RacePosition]:
-        # table: list = self.positions.
-        # for race_position in self.positions:
-        #     table.append(
-        #         race_position
-        #     )
         return sorted(deepcopy(self.positions), key=lambda driver: driver.position)
+    
+    def details(self) -> None:
+        for position in self.classification():
+            print(position.details)
 
     def driver_races(self, driver_id: str) -> list[RacePosition]:
         return list(
@@ -160,14 +164,20 @@ class Season:
     year: str
     rounds: int
     races: list[Race]
+    drivers: dict[int, Driver]
+    circuits: dict[str, Circuit]
+    constructors: dict[str, Constructor]
 
     def __init__(self) -> None:
-        self.races = []
-
-    def driver_classification(self, drivers: dict[int, Driver]) -> dict:
-        classification: list = []
-        for driver in drivers.keys():
-            driver_id: str = drivers[driver].code
+        self.races: list[Race] = []
+        self.drivers: dict[int, Driver] = []
+        self.circuits: dict[str, Circuit] = []
+        self.constructors: dict[str, Constructor] = []
+    
+    def driver_classification(self) -> dict:
+        classification: list[dict] = []
+        for driver in self.drivers.keys():
+            driver_id: str = self.drivers[driver].code
             positions: list["RacePosition"] = self.driver_races(driver_id)
             classification.append(
                 {
@@ -182,10 +192,10 @@ class Season:
             )
         return sorted(classification, key=lambda driver: driver["points"], reverse=True)
     
-    def constructor_classification(self, constructors: dict) -> dict:
-        classification: list = []
-        for constructor in constructors.keys():
-            constructor: str = constructors[constructor].id
+    def constructor_classification(self) -> dict:
+        classification: list[dict] = []
+        for constructor in self.constructors.keys():
+            constructor: str = self.constructors[constructor].id
             positions: list["RacePosition"] = self.constructor_races(constructor)
             classification.append(
                 {
@@ -200,23 +210,18 @@ class Season:
         return sorted(classification, key=lambda driver: driver["points"], reverse=True)
 
     def driver_races(self, driver_id: str) -> list["RacePosition"]:
-        races_by_driver: list = []
-        for race in self.races:
-            races_by_driver.extend(
-                race.driver_races(driver_id)
+        return list(
+            chain.from_iterable(
+                race.driver_races(driver_id) for race in self.races
             )
-        return races_by_driver
+        )
     
     def constructor_races(self, constructor_id: str) -> list["RacePosition"]:
-        races_by_constructor: list = []
-        for race in self.races:
-            races_by_constructor.extend(
-                race.constructor_races(constructor_id)
+        return list(
+            chain.from_iterable(
+                race.constructor_races(constructor_id) for race in self.races
             )
-        return races_by_constructor
+        )
     
     def grid_positions(self, driver_id: str) -> list[int]:
-        positions: list[int] = []
-        for race in self.driver_races(driver_id):
-            positions.append(race.position)
-        return positions
+        return [race.position for race in self.driver_races(driver_id)]
